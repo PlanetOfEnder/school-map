@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Map</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --sidebar-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #bb86fc;
+            --hover-color: #333;
+            --border-color: #333;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #sidebar {
+            width: 300px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        #sidebar-header {
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--accent-color);
+        }
+
+        #map-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        #map-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border-radius: 8px;
+        }
+
+        /* Accordion Styles */
+        #accordion-container {
+            flex-grow: 1;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-header {
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+            font-weight: 500;
+        }
+
+        .accordion-header:hover {
+            background-color: var(--hover-color);
+        }
+
+        .accordion-content {
+            display: none;
+            background-color: #252525;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        /* Level Items */
+        .level-item {
+            border-bottom: 1px solid #333;
+        }
+
+        .level-header {
+            padding: 12px 20px 12px 40px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .level-header:hover {
+            background-color: #3a3a3a;
+        }
+
+        .level-content {
+            display: none;
+            background-color: #2a2a2a;
+        }
+
+        .level-content.active {
+            display: block;
+        }
+
+        /* Room Items */
+        .room-item {
+            padding: 10px 20px 10px 60px;
+            font-size: 0.85rem;
+            color: #b0b0b0;
+            border-bottom: 1px solid #383838;
+        }
+
+        .room-item:last-child {
+            border-bottom: none;
+        }
+
+        .arrow {
+            transition: transform 0.2s;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .active > .accordion-header .arrow,
+        .active > .level-header .arrow {
+            transform: rotate(90deg);
+        }
+
+    </style>
+</head>
+<body>
+
+    <aside id="sidebar">
+        <div id="sidebar-header">Campus Map</div>
+        <div id="accordion-container">
+            <!-- Dynamic Content -->
+        </div>
+    </aside>
+
+    <main id="map-container">
+        <img src="images/map.png" alt="Campus Map" id="campus-map">
+    </main>
+
+    <script>
+        async function loadData() {
+            try {
+                const response = await fetch('data.json');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                renderAccordion(data.buildings);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('accordion-container').innerHTML = 
+                    '<div style="padding: 20px; color: #ff6b6b;">Failed to load data. Please ensure data.json exists and is valid.</div>';
+            }
+        }
+
+        function renderAccordion(buildings) {
+            const container = document.getElementById('accordion-container');
+            container.innerHTML = '';
+            
+            buildings.forEach(building => {
+                const buildingEl = document.createElement('div');
+                buildingEl.className = 'accordion-item';
+                
+                buildingEl.innerHTML = `
+                    <div class="accordion-header">
+                        <span>${building.name}</span>
+                        <span class="arrow">▶</span>
+                    </div>
+                    <div class="accordion-content">
+                    </div>
+                `;
+
+                const header = buildingEl.querySelector('.accordion-header');
+                const content = buildingEl.querySelector('.accordion-content');
+
+                header.addEventListener('click', () => {
+                    const isActive = buildingEl.classList.toggle('active');
+                    content.classList.toggle('active', isActive);
+                });
+
+                // Add Levels
+                if (building.levels) {
+                    building.levels.forEach(level => {
+                        const levelEl = document.createElement('div');
+                        levelEl.className = 'level-item';
+                        
+                        levelEl.innerHTML = `
+                            <div class="level-header">
+                                <span>${level.name}</span>
+                                <span class="arrow">▶</span>
+                            </div>
+                            <div class="level-content">
+                            </div>
+                        `;
+
+                        const levelHeader = levelEl.querySelector('.level-header');
+                        const levelContent = levelEl.querySelector('.level-content');
+
+                        levelHeader.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const isActive = levelEl.classList.toggle('active');
+                            levelContent.classList.toggle('active', isActive);
+                        });
+
+                        // Add Rooms
+                        if (level.rooms) {
+                            level.rooms.forEach(room => {
+                                const roomEl = document.createElement('div');
+                                roomEl.className = 'room-item';
+                                roomEl.textContent = room;
+                                levelContent.appendChild(roomEl);
+                            });
+                        }
+
+                        content.appendChild(levelEl);
+                    });
+                }
+
+                container.appendChild(buildingEl);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

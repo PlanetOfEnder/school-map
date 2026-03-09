@@ -1,0 +1,47 @@
+{
+  "buildings": [
+    {
+      "id": "b1",
+      "name": "Science Block",
+      "levels": [
+        {
+          "id": "b1-l1",
+          "name": "Level 1",
+          "rooms": ["S101", "S102", "S103"]
+        },
+        {
+          "id": "b1-l2",
+          "name": "Level 2",
+          "rooms": ["S201", "S202", "Laboratory A"]
+        }
+      ]
+    },
+    {
+      "id": "b2",
+      "name": "Arts Building",
+      "levels": [
+        {
+          "id": "b2-l1",
+          "name": "Ground Floor",
+          "rooms": ["Gallery", "Office 1"]
+        },
+        {
+          "id": "b2-l2",
+          "name": "Studio Floor",
+          "rooms": ["Studio 1", "Studio 2", "Recording Booth"]
+        }
+      ]
+    },
+    {
+      "id": "b3",
+      "name": "Main Library",
+      "levels": [
+        {
+          "id": "b3-l1",
+          "name": "First Floor",
+          "rooms": ["Quiet Study Area", "IT Lab"]
+        }
+      ]
+    }
+  ]
+}
