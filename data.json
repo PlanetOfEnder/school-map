@@ -3,6 +3,7 @@
     {
       "id": "b1",
       "name": "Science Block",
+      "marker": { "x": "44%", "y": "28%" },
       "levels": [
         {
           "id": "b1-l1",
@@ -19,6 +20,7 @@
     {
       "id": "b2",
       "name": "Arts Building",
+      "marker": { "x": "60%", "y": "45%" },
       "levels": [
         {
           "id": "b2-l1",
@@ -35,6 +37,7 @@
     {
       "id": "b3",
       "name": "Main Library",
+      "marker": { "x": "40%", "y": "70%" },
       "levels": [
         {
           "id": "b3-l1",

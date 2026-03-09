@@ -52,12 +52,36 @@
             overflow: auto;
         }
 
-        #map-container img {
+        #map-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        #map-wrapper img {
+            display: block;
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             border-radius: 8px;
+        }
+
+        .marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: var(--accent-color);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(187, 134, 252, 0.8);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .marker:hover {
+            transform: translate(-50%, -50%) scale(1.5);
+            background-color: #fff;
         }
 
         /* Accordion Styles */
@@ -154,7 +178,10 @@
     </aside>
 
     <main id="map-container">
-        <img src="images/map.png" alt="Campus Map" id="campus-map">
+        <div id="map-wrapper">
+            <img src="images/map.png" alt="Campus Map" id="campus-map">
+            <!-- Markers will be added here -->
+        </div>
     </main>
 
     <script>
@@ -164,6 +191,7 @@
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
                 renderAccordion(data.buildings);
+                renderMarkers(data.buildings);
             } catch (error) {
                 console.error('Error loading data:', error);
                 document.getElementById('accordion-container').innerHTML = 
@@ -238,7 +266,50 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', loadData);
+        function renderMarkers(buildings) {
+            const wrapper = document.getElementById('map-wrapper');
+            // Keep the image, but remove old markers
+            const markers = wrapper.querySelectorAll('.marker');
+            markers.forEach(m => m.remove());
+
+            buildings.forEach(building => {
+                if (building.marker) {
+                    const markerEl = document.createElement('div');
+                    markerEl.className = 'marker';
+                    markerEl.style.left = building.marker.x;
+                    markerEl.style.top = building.marker.y;
+                    markerEl.title = building.name;
+                    
+                    markerEl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // Optional: trigger accordion or show info
+                        alert(`Building: ${building.name}`);
+                    });
+
+                    wrapper.appendChild(markerEl);
+                }
+            });
+        }
+
+        function initMapClickListener() {
+            const mapImg = document.getElementById('campus-map');
+            
+            mapImg.addEventListener('click', (e) => {
+                const rect = mapImg.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                
+                const xFormatted = Math.round(x) + '%';
+                const yFormatted = Math.round(y) + '%';
+                
+                console.log(`"marker": { "x": "${xFormatted}", "y": "${yFormatted}" },`);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            initMapClickListener();
+        });
     </script>
 </body>
 </html>
